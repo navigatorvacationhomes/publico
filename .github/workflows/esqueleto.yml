@@ -1,0 +1,8 @@
+name: esqueleto
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  esqueleto:
+    uses: ./.github/workflows/esqueleto-reutilizavel.yml

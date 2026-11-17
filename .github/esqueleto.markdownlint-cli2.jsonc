@@ -1,0 +1,24 @@
+// Checagem "esqueleto" (regra 24 do AGENTS.md).
+// Seções do modelo 00-09-sistema/02-modelos-e-templates/2026-11-12_02.01_modelo-de-documento.md.
+// "?" = o título do documento. "+" = a seção do conteúdo, com título livre.
+// As regras do .markdownlint-cli2.jsonc da raiz também valem aqui, mesmo com
+// --config: o markdownlint-cli2 lê a configuração da pasta junto. Testado em
+// 12/11/2026 com a versão 0.24.0 (a da ação): linha em branco repetida
+// (MD012) é barrada. São as mesmas regras da checagem "formato".
+{
+  "config": {
+    "default": false,
+    "required-headings": {
+      "match_case": true,
+      "headings": [
+        "?",
+        "## Propósito",
+        "## Escopo",
+        "## Papéis e responsabilidades",
+        "+",
+        "## Exceções",
+        "## Referências"
+      ]
+    }
+  }
+}
