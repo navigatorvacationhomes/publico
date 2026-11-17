@@ -1,0 +1,29 @@
+# Checagem "instrucoes", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Fica vermelha se o AGENTS.md ou o .github/copilot-instructions.md
+# do repositório que a chamou passar de 200 linhas (regra 3 do AGENTS.md do
+# cofre). Arquivo que não existe não é conferido.
+name: instrucoes-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  instrucoes:
+    name: instrucoes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Contar linhas dos arquivos de instrução (limite 200, regra 3 do AGENTS.md)
+        run: |
+          erro=0
+          for f in AGENTS.md .github/copilot-instructions.md; do
+            if [ -f "$f" ]; then
+              n=$(wc -l < "$f")
+              echo "$f: $n linhas (limite: 200)"
+              if [ "$n" -gt 200 ]; then
+                echo "::error file=$f::$f tem $n linhas. O limite é 200."
+                erro=1
+              fi
+            fi
+          done
+          exit $erro
