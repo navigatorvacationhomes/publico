@@ -1,0 +1,9 @@
+name: formulario
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+permissions:
+  contents: read
+jobs:
+  formulario:
+    uses: ./.github/workflows/formulario-reutilizavel.yml
