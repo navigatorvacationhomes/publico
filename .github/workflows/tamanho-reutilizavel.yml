@@ -1,0 +1,39 @@
+# Checagem "tamanho", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Fica vermelha quando o pedido muda mais de 200 linhas (regra 4
+# do AGENTS.md do cofre). Cada repositório passa a sua lista de pastas que
+# não contam.
+name: tamanho-reutilizavel
+on:
+  workflow_call:
+    inputs:
+      excluir:
+        description: "Pastas que não contam, uma por linha"
+        type: string
+        default: ""
+permissions:
+  contents: read
+jobs:
+  tamanho:
+    name: tamanho
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Contar linhas mudadas (limite 200, regra 4 do AGENTS.md)
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          EXCLUIR: ${{ inputs.excluir }}
+        run: |
+          fora=()
+          while IFS= read -r p; do
+            if [ -n "$p" ]; then fora+=(":(exclude)$p"); fi
+          done <<< "$EXCLUIR"
+          total=$(git diff --numstat -M "$BASE...$HEAD" -- . "${fora[@]}" \
+            | awk '$1 != "-" { total += $1 + $2 } END { print total + 0 }')
+          echo "Linhas mudadas: $total (limite: 200)"
+          if [ "$total" -gt 200 ]; then
+            echo "::error::Pedido com $total linhas mudadas. O limite é 200. Divida em pedidos menores."
+            exit 1
+          fi

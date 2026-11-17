@@ -1,0 +1,10 @@
+name: links
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  links:
+    uses: ./.github/workflows/links-reutilizavel.yml

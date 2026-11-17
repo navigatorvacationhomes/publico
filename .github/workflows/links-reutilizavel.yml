@@ -1,0 +1,34 @@
+# Checagem "links", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Confere, sem internet, os links e as âncoras do repositório que
+# a chamou. Cada repositório passa a sua lista de pastas fora da conferência.
+name: links-reutilizavel
+on:
+  workflow_call:
+    inputs:
+      excluir:
+        description: "Pastas fora da conferência, uma por linha, sem espaço no nome"
+        type: string
+        default: ""
+permissions:
+  contents: read
+jobs:
+  links:
+    name: links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Montar a lista de pastas fora da conferência
+        id: lista
+        env:
+          EXCLUIR: ${{ inputs.excluir }}
+        run: |
+          extras=""
+          while IFS= read -r p; do
+            if [ -n "$p" ]; then extras="$extras --exclude-path $p"; fi
+          done <<< "$EXCLUIR"
+          echo "extras=$extras" >> "$GITHUB_OUTPUT"
+      - uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: --offline --include-fragments ${{ steps.lista.outputs.extras }} .
+          fail: true
+          failIfEmpty: false
