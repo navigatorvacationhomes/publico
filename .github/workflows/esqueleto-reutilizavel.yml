@@ -1,0 +1,53 @@
+# Checagem "esqueleto", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Barra o .md novo ou alterado do repositório que a chamou quando
+# falta uma seção do modelo ou ela está fora da ordem (regra 24 do AGENTS.md do
+# cofre). A configuração fica aqui no publico.
+name: esqueleto-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  esqueleto:
+    name: esqueleto
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - name: Listar os .md novos ou alterados (regra 24 do AGENTS.md)
+        id: lista
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Arquivo só movido, sem mudar o texto (R100), fica de fora (regra 4).
+          arquivos=$(git -c core.quotePath=false diff --name-status --diff-filter=AMR "$BASE...$HEAD" -- '*.md' \
+            ':(exclude,glob)**/README.md' \
+            ':(exclude)AGENTS.md' \
+            ':(exclude)CLAUDE.md' \
+            ':(exclude).github/pull_request_template.md' \
+            ':(exclude).github/copilot-instructions.md' \
+            ':(exclude).github/instructions/' \
+            ':(exclude).claude/skills/' \
+            ':(exclude)10-19-estrategia-e-governanca/15-melhoria-e-conhecimento/15.02-manual-da-gitlab-traduzido/traducao/' \
+            | awk -F'\t' '$1 == "R100" { next } { print ":" $NF }')
+          echo "Arquivos conferidos:"
+          echo "${arquivos:-nenhum}"
+          if [ -n "$arquivos" ]; then
+            marca="FIM_$RANDOM$RANDOM"
+            {
+              echo "arquivos<<$marca"
+              echo "$arquivos"
+              echo "$marca"
+            } >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.lista.outputs.arquivos != ''
+        uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
+        with:
+          config: .publico/.github/esqueleto.markdownlint-cli2.jsonc
+          globs: ${{ steps.lista.outputs.arquivos }}
