@@ -1,0 +1,39 @@
+# Checagem "tipo-e-tamanho", escrita uma vez só e chamada pelos repositórios
+# da Navigator. Barra tipo de arquivo proibido e arquivo acima do limite nos
+# arquivos novos ou alterados do pedido. Cada repositório passa a sua lista.
+# O programa e o teste ficam aqui no publico, em .github/scripts/.
+name: tipo-e-tamanho-reutilizavel
+on:
+  workflow_call:
+    inputs:
+      bloquear:
+        description: "Extensões proibidas, separadas por espaço, em minúsculas"
+        type: string
+        default: "pdf doc docx xls xlsx jpg jpeg heic zip exe pyc"
+      limite:
+        description: "Tamanho máximo de cada arquivo, em bytes"
+        type: number
+        default: 1000000
+permissions:
+  contents: read
+jobs:
+  tipo-e-tamanho:
+    name: tipo-e-tamanho
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - name: Teste de regressão da própria checagem
+        run: bash .publico/.github/scripts/testa-tipo-e-tamanho.sh
+      - name: Conferir tipo e tamanho dos arquivos do pedido
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+          BLOQUEAR: ${{ inputs.bloquear }}
+          LIMITE: ${{ inputs.limite }}
+        run: bash .publico/.github/scripts/tipo-e-tamanho.sh
