@@ -1,0 +1,39 @@
+# Checagem "prosa", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Barra sigla fora da lista e palavra proibida nos .md novos ou
+# alterados do repositório que a chamou (regra 3 do AGENTS.md do cofre). A
+# configuração do Vale e o teste ficam aqui no publico.
+name: prosa-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  prosa:
+    name: prosa
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - name: Instalar o Vale 3.19.0, conferindo o código do arquivo
+        run: |
+          curl -sSL -o vale.tgz https://github.com/errata-ai/vale/releases/download/v3.19.0/vale_3.19.0_Linux_64-bit.tar.gz
+          echo "c8f9d6c8055442bc7e9c121b2498e6f0e3fb670f4665e6ee577f1897f7665cf6  vale.tgz" | sha256sum -c -
+          tar xzf vale.tgz vale && sudo mv vale /usr/local/bin/ && rm vale.tgz
+      - name: Teste de regressão da própria checagem
+        run: cd .publico && bash .github/scripts/testa-prosa.sh
+      - name: Conferir siglas e palavras proibidas nos .md novos ou alterados (regra 3 do AGENTS.md)
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          mapfile -t arquivos < <(git -c core.quotePath=false diff --name-only --diff-filter=AMR "$BASE...$HEAD" -- '*.md' \
+            ':(exclude).github/' \
+            ':(exclude).claude/skills/' \
+            ':(exclude)10-19-estrategia-e-governanca/15-melhoria-e-conhecimento/15.02-manual-da-gitlab-traduzido/traducao/')
+          echo "Arquivos conferidos: ${arquivos[*]:-nenhum}"
+          [ "${#arquivos[@]}" -eq 0 ] || vale --config=.publico/.vale.ini --no-wrap "${arquivos[@]}"

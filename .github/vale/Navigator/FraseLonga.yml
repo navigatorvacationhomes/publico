@@ -1,0 +1,8 @@
+# Regra 3 do AGENTS.md: frases curtas. Da GitLab: aviso acima de 25 palavras.
+# É aviso, não barra o pedido (na GitLab também é só aviso).
+extends: occurrence
+message: "Frase com mais de 25 palavras. Divida em duas (regra 3 do AGENTS.md)."
+level: warning
+scope: sentence
+max: 25
+token: '[\p{L}\p{N}]+'
