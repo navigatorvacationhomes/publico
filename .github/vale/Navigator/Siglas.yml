@@ -1,0 +1,39 @@
+# Regra 3 do AGENTS.md: sem sigla. Ficam como estão: nomes de arquivo e de
+# ferramenta, o termo "ID" e os nomes oficiais abaixo, aprovados pelo Renato.
+# Texto entre crases (`) não é conferido. Sigla nova só entra nesta lista por
+# pedido aprovado pelo Renato.
+extends: existence
+message: "'%s' é sigla. Escreva por extenso ou ponha entre crases se for nome de arquivo ou de ferramenta (regra 3 do AGENTS.md)."
+level: error
+ignorecase: false
+tokens:
+  - '[A-Z][A-Z0-9]+'
+exceptions:
+  # O termo do índice e o formato de data da regra 13.
+  - ID
+  - AAAA
+  - MM
+  - DD
+  # Nomes de arquivo exigidos pela ferramenta (regra 13).
+  - README
+  - AGENTS
+  - CLAUDE
+  - SKILL
+  - CODEOWNERS
+  # Nomes oficiais de documentos, órgãos e normas.
+  - APQC
+  - ASO
+  - CAT
+  - CNPJ
+  - CRM
+  - DRE
+  - IPTU
+  - ISO
+  - NDA
+  - NPS
+  - PCF
+  - PCMSO
+  - PGR
+  - PPRA
+  - SPED
+  - TI

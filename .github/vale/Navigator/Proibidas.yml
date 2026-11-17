@@ -1,0 +1,9 @@
+# Palavras proibidas. A lista sai dos manuais do repositório: cada manual que
+# entrar acrescenta aqui as palavras dele, no mesmo pedido.
+# Até lá, a lista tem só o marcador abaixo, que nenhum texto usa.
+extends: existence
+message: "'%s' é palavra proibida pelos manuais."
+level: error
+ignorecase: true
+tokens:
+  - 'xxpalavra-proibida-de-testexx'
