@@ -1,0 +1,24 @@
+# Checagem "formato", escrita uma vez só e chamada pelos repositórios da
+# Navigator (o publico e o cofre). Ela confere os .md do repositório que a
+# chamou, com a configuração do markdownlint guardada aqui no publico.
+name: formato-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  formato:
+    name: formato
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - uses: DavidAnson/markdownlint-cli2-action@696eb3f2509270d7b882d2aa68347bc676e7af34 # v25.0.0
+        with:
+          config: .publico/.markdownlint-cli2.jsonc
+          globs: |
+            **/*.md
+            !.publico/**

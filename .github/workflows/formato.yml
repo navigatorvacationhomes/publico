@@ -1,0 +1,10 @@
+name: formato
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  formato:
+    uses: ./.github/workflows/formato-reutilizavel.yml
