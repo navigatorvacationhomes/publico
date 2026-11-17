@@ -1,0 +1,32 @@
+# Checagem "prazos", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Aponta "Em teste até" e "Próxima revisão" vencidos nos .md do
+# repositório que a chamou (regra 22 do AGENTS.md do cofre). O programa e o
+# teste ficam aqui no publico, em .github/scripts/.
+name: prazos-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  prazos:
+    name: prazos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - name: Teste de regressão da própria checagem
+        run: cd .publico/.github/scripts && python3 testa_prazos.py
+      - name: No pedido, conferir só os .md mudados (regra 22 do AGENTS.md)
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: python3 .publico/.github/scripts/prazos.py pedido
+      - name: Toda segunda-feira, conferir todos os .md
+        if: github.event_name != 'pull_request'
+        run: python3 .publico/.github/scripts/prazos.py semanal

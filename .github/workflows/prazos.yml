@@ -1,0 +1,11 @@
+name: prazos
+on:
+  pull_request:
+  schedule:
+    - cron: "17 11 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prazos:
+    uses: ./.github/workflows/prazos-reutilizavel.yml
