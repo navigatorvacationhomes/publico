@@ -1,0 +1,24 @@
+# Checagem "formulario", escrita uma vez só e chamada pelos repositórios da
+# Navigator. Confere se o texto do pedido traz todos os títulos do formulário
+# (regra 26 do AGENTS.md do cofre). O formulário que vale é o daqui do
+# publico, em .github/pull_request_template.md, para ter uma fonte só.
+name: formulario-reutilizavel
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  formulario:
+    name: formulario
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: navigatorvacationhomes/publico
+          path: .publico
+      - name: Teste de regressão da própria checagem
+        run: cd .publico && PYTHONPATH=.github/scripts python3 .github/scripts/testa_formulario.py
+      - name: Conferir o formulário do pedido (regra 26 do AGENTS.md)
+        env:
+          CORPO: ${{ github.event.pull_request.body }}
+        run: cd .publico && python3 .github/scripts/formulario.py
